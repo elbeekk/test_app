@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/domain/services/local_storage.dart';
 import 'package:test_app/presentation/pages/home/home_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorage.database;
   runApp(const MyApp());
 }
 

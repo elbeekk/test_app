@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:test_app/domain/models/event.dart';
 
 class LocalStorage {
   LocalStorage._();
@@ -7,10 +8,13 @@ class LocalStorage {
   static Database? _db;
   static const String _tableName = 'events';
   static const String _columnId = 'id';
-  static const String _columnContent = 'content';
-  static const String _columnStatus = 'status';
+  static const String _columnName = 'name';
+  static const String _columnDesc = 'description';
+  static const String _columnLocation = 'location';
+  static const String _columnColor = 'color';
+  static const String _columnTime = 'time';
 
-  Future<Database> get database async {
+  static Future<Database> get database async {
     if (_db != null) {
       return _db!;
     }
@@ -18,19 +22,23 @@ class LocalStorage {
     return _db!;
   }
 
-  Future<Database> getDatabase() async {
+  static Future<Database> getDatabase() async {
     final databaseDirPath = await getDatabasesPath();
 
     final databasePath = join(databaseDirPath, "$_tableName.db");
 
     final database = await openDatabase(
       databasePath,
-      onCreate: (db, version) {
+      version: 1,
+      onCreate: (db, version) async {
         db.execute("""
         CREATE TABLE $_tableName (
         $_columnId INTEGER PRIMARY KEY,
-        $_columnContent TEXT NOT NULL,
-        $_columnStatus INTEGER NOT NULL
+        $_columnTime TEXT NOT NULL,
+        $_columnDesc TEXT NOT NULL,
+        $_columnColor INTEGER NOT NULL,
+        $_columnLocation TEXT NOT NULL,
+        $_columnName TEXT NOT NULL
         )
         """);
       },
@@ -38,12 +46,28 @@ class LocalStorage {
     return database;
   }
 
-  Future<void> addTask(String content) async {
+  static Future<void> addEvent(EventModel event) async {
     final db = await database;
 
-    await db.insert(_tableName, {
-      _columnContent: content,
-      _columnStatus: 0,
-    });
+    await db.insert(_tableName, event.toJson());
+  }
+
+  static Future<void> updateEvent(EventModel event) async {
+    final db = await database;
+
+    await db.update(_tableName, event.toJson());
+  }
+
+  static Future<List<EventModel>> getEvents() async {
+    final db = await database;
+
+    final res = await db.query(
+      _tableName,
+    );
+    return res
+        .map(
+          (e) => EventModel.fromJson(e),
+        )
+        .toList();
   }
 }

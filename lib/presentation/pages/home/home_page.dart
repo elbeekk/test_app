@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart' hide CalendarDatePicker;
+import 'package:test_app/domain/models/event.dart';
+import 'package:test_app/domain/services/local_storage.dart';
+import 'package:test_app/presentation/pages/add_event/add_event.dart';
+import 'package:test_app/presentation/widgets/event_item.dart';
 
 import '../../style/app_colors.dart';
 import '../../widgets/calendar/calendar_date_picker.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,156 +80,107 @@ class HomePage extends StatelessWidget {
           )
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: DatePickerTheme(
-              data: DatePickerThemeData(
-                backgroundColor: AppColors.backgroundPrimary,
-                elevation: 0,
-                weekdayStyle: TextStyle(
-                  color: Colors.grey.shade500,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: DatePickerTheme(
+                data: DatePickerThemeData(
+                  backgroundColor: AppColors.backgroundPrimary,
+                  elevation: 0,
+                  weekdayStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+                child: CalendarDatePicker(
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1950),
+                  lastDate: DateTime(2050),
+                  onDateChanged: (value) {},
                 ),
               ),
-              child: CalendarDatePicker(
-                initialDate: DateTime.now(),
-                firstDate: DateTime(1950),
-                lastDate: DateTime(2050),
-                onDateChanged: (value) {},
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 22,
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Schedule",
-                      style: TextStyle(
-                          color: AppColors.onBackgroundPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: AppColors.primary,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.add,
-                              color: AppColors.onPrimary,
-                              size: 18,
-                            ),
-                            const SizedBox(
-                              width: 2,
-                            ),
-                            Text(
-                              "Add Event",
-                              style: TextStyle(
-                                  color: AppColors.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13),
-                            )
-                          ],
-                        )),
-                  ],
-                ),
-                const SizedBox(
-                  height: 14,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(.2),
-                          borderRadius: BorderRadius.circular(
-                            10,
-                          ),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 15,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Deadline Project UI Website",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    "Profile page, Cart and Wishlist",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  SizedBox(
-                                    height: 15,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time_filled,
-                                        color: Colors.red,
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                        "21:00 - 22:30",
-                                        style: TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Schedule",
+                        style: TextStyle(
+                            color: AppColors.onBackgroundPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
                       ),
+                      ElevatedButton(
+                          onPressed: () {
+
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddEvent(),
+                                ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            backgroundColor: AppColors.primary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.add,
+                                color: AppColors.onPrimary,
+                                size: 18,
+                              ),
+                              const SizedBox(
+                                width: 2,
+                              ),
+                              Text(
+                                "Add Event",
+                                style: TextStyle(
+                                    color: AppColors.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13),
+                              )
+                            ],
+                          )),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 14,
+                  ),
+                  FutureBuilder(
+                    future: Future(
+                      () async {
+                        return await LocalStorage.getEvents();
+                      },
                     ),
-                  ],
-                )
-              ],
-            ),
-          )
-        ],
+                    builder: (context, snapshot) {
+                      return Column(
+                        children: List.generate(
+                          snapshot.data?.length ?? 0,
+                          (index) => EventItem(
+                              eventModel:
+                                  snapshot.data?[index] ?? EventModel()),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 class EventModel {
+  int? id;
   String? name;
   String? description;
   String? location;
-  String? color;
+  int? color;
   String? time;
 
   EventModel({
+    this.id,
     this.name,
     this.description,
     this.location,
@@ -16,13 +18,15 @@ class EventModel {
   });
 
   EventModel copyWith({
+    int? id,
     String? name,
     String? description,
     String? location,
-    String? color,
+    int? color,
     String? time,
   }) =>
       EventModel(
+        id: id ?? this.id,
         name: name ?? this.name,
         description: description ?? this.description,
         location: location ?? this.location,
@@ -35,6 +39,7 @@ class EventModel {
   String toRawJson() => json.encode(toJson());
 
   factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
+    id: json["id"],
     name: json["name"],
     description: json["description"],
     location: json["location"],
@@ -43,6 +48,7 @@ class EventModel {
   );
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "name": name,
     "description": description,
     "location": location,
