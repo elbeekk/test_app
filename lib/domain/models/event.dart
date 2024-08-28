@@ -17,6 +17,8 @@ class EventModel {
     this.time,
   });
 
+  get timeCon => null;
+
   EventModel copyWith({
     int? id,
     String? name,

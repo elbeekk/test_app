@@ -6,6 +6,9 @@ class CustomTextField extends StatelessWidget {
   final String? label;
   final bool showSuffix;
   final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final bool? readOnly;
+  final VoidCallback? onTap;
 
   final int minLines;
 
@@ -15,6 +18,9 @@ class CustomTextField extends StatelessWidget {
     this.showSuffix = false,
     this.minLines = 1,
     this.controller,
+    this.validator,
+    this.readOnly,
+    this.onTap,
   });
 
   @override
@@ -41,7 +47,10 @@ class CustomTextField extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: TextFormField(
+                    readOnly: readOnly ?? false,
+                    validator: validator,
+                    onTap: onTap,
                     controller: controller,
                     minLines: minLines,
                     maxLines: 7,

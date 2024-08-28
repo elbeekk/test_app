@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:test_app/domain/models/event.dart';
 import 'package:test_app/presentation/style/app_colors.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -39,6 +40,7 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
+    required this.events,
   })  : initialDate =
             initialDate == null ? null : DateUtils.dateOnly(initialDate),
         firstDate = DateUtils.dateOnly(firstDate),
@@ -74,6 +76,7 @@ class CalendarDatePicker extends StatefulWidget {
 
   /// The [DateTime] representing today. It will be highlighted in the day grid.
   final DateTime currentDate;
+  final List<EventModel> events;
 
   /// Called when the user selects a date in the picker.
   final ValueChanged<DateTime> onDateChanged;
@@ -242,6 +245,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     switch (_mode) {
       case DatePickerMode.day:
         return _MonthPicker(
+          events: widget.events,
           key: _monthPickerKey,
           initialMonth: _currentDisplayedMonthDate,
           currentDate: widget.currentDate,
@@ -419,6 +423,7 @@ class _MonthPicker extends StatefulWidget {
   _MonthPicker({
     super.key,
     required this.initialMonth,
+    required this.events,
     required this.currentDate,
     required this.firstDate,
     required this.lastDate,
@@ -437,6 +442,7 @@ class _MonthPicker extends StatefulWidget {
   /// provide that widget the new [initialMonth]. This will reset the widget's
   /// interactive state.
   final DateTime initialMonth;
+  final List<EventModel> events;
 
   /// The current date.
   ///
@@ -719,7 +725,9 @@ class _MonthPickerState extends State<_MonthPicker> {
   Widget _buildItems(BuildContext context, int index) {
     final DateTime month =
         DateUtils.addMonthsToMonthDate(widget.firstDate, index);
+
     return _DayPicker(
+      events: widget.events,
       key: ValueKey<DateTime>(month),
       selectedDate: widget.selectedDate,
       currentDate: widget.currentDate,
@@ -848,6 +856,7 @@ class _DayPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.selectableDayPredicate,
+    required this.events,
   })  : assert(!firstDate.isAfter(lastDate)),
         assert(selectedDate == null || !selectedDate.isBefore(firstDate)),
         assert(selectedDate == null || !selectedDate.isAfter(lastDate));
@@ -859,6 +868,7 @@ class _DayPicker extends StatefulWidget {
 
   /// The current date at the time the picker is displayed.
   final DateTime currentDate;
+  final List<EventModel> events;
 
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
@@ -992,8 +1002,21 @@ class _DayPickerState extends State<_DayPicker> {
         final bool isToday =
             DateUtils.isSameDay(widget.currentDate, dayToBuild);
 
+        final List<Color> events = widget.events
+            .where(
+              (element) =>
+                  element.time?.split(' ').first ==
+                  dayToBuild.toString().split(' ').elementAtOrNull(0),
+            )
+            .map(
+              (e) => Color(e.color ?? 0),
+            )
+            .take(3)
+            .toList();
+
         dayItems.add(
           _Day(
+            dots: events,
             dayToBuild,
             key: ValueKey<DateTime>(dayToBuild),
             isDisabled: isDisabled,
@@ -1031,10 +1054,12 @@ class _Day extends StatefulWidget {
     required this.isToday,
     required this.onChanged,
     required this.focusNode,
+    required this.dots,
   });
 
   final DateTime day;
   final bool isDisabled;
+  final List<Color> dots;
   final bool isSelectedDay;
   final bool isToday;
   final ValueChanged<DateTime> onChanged;
@@ -1148,6 +1173,7 @@ class _DayState extends State<_Day> {
         customBorder: dayShape,
         containedInkWell: true,
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Center(
               child: Container(
@@ -1166,36 +1192,25 @@ class _DayState extends State<_Day> {
                 ),
               ),
             ),
-            const Positioned(
-                bottom: 0,
+            Positioned(
+                bottom: -2,
                 right: 0,
                 left: 1,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      color: Colors.blue,
-                      size: 6,
-                    ),
-                    SizedBox(
-                      width: 3,
-                    ),
-                    Icon(
-                      Icons.circle,
-                      color: Colors.red,
-                      size: 6,
-                    ),
-                    SizedBox(
-                      width: 3,
-                    ),
-                    Icon(
-                      Icons.circle,
-                      color: Colors.orangeAccent,
-                      size: 6,
-                    ),
-                  ],
-                )),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      widget.dots.length,
+                      (index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 2),
+                          child: Icon(
+                            Icons.circle,
+                            color: widget.dots[index],
+                            size: 6,
+                          ),
+                        );
+                      },
+                    ))),
           ],
         ),
       );

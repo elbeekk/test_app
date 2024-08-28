@@ -55,7 +55,14 @@ class LocalStorage {
   static Future<void> updateEvent(EventModel event) async {
     final db = await database;
 
-    await db.update(_tableName, event.toJson());
+    await db.update(_tableName, event.toJson(),
+        where: '$_columnId = ?', whereArgs: [event.id]);
+  }
+
+  static Future<void> deleteEvent(EventModel event) async {
+    final db = await database;
+
+    await db.delete(_tableName, where: '$_columnId = ?', whereArgs: [event.id]);
   }
 
   static Future<List<EventModel>> getEvents() async {
